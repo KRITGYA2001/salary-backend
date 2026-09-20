@@ -1,10 +1,10 @@
 package com.acme.salary.seed;
 
+import static com.acme.salary.employee.EmployeeConstraints.EMPLOYEE_CODE_FORMAT;
 import static com.acme.salary.seed.SeedConstants.ACTIVE_PERCENTAGE;
 import static com.acme.salary.seed.SeedConstants.BASE_SALARY_BY_COUNTRY;
 import static com.acme.salary.seed.SeedConstants.EARLIEST_HIRE_DATE;
 import static com.acme.salary.seed.SeedConstants.EMAIL_DOMAIN;
-import static com.acme.salary.seed.SeedConstants.EMPLOYEE_CODE_FORMAT;
 import static com.acme.salary.seed.SeedConstants.FIRST_NAMES;
 import static com.acme.salary.seed.SeedConstants.FULL_TIME_PERCENTAGE;
 import static com.acme.salary.seed.SeedConstants.LAST_NAMES;

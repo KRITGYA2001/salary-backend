@@ -5,8 +5,15 @@ import static com.acme.salary.common.PaginationConstants.MAX_PAGE_SIZE;
 
 import com.acme.salary.common.ApiPaths;
 import com.acme.salary.common.PageResponse;
+import jakarta.validation.Valid;
+import java.net.URI;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,5 +60,27 @@ public class EmployeeController {
                 page,
                 size);
         return employeeService.search(criteria);
+    }
+
+    @GetMapping("/{id}")
+    public EmployeeSummary get(@PathVariable long id) {
+        return employeeService.get(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<EmployeeSummary> create(@Valid @RequestBody CreateEmployeeRequest request) {
+        EmployeeSummary created = employeeService.create(request);
+        return ResponseEntity.created(URI.create(ApiPaths.EMPLOYEES + "/" + created.id())).body(created);
+    }
+
+    /** Partially updates non-salary fields; use the salary endpoint to change pay. */
+    @PatchMapping("/{id}")
+    public EmployeeSummary update(@PathVariable long id, @Valid @RequestBody UpdateEmployeeRequest request) {
+        return employeeService.update(id, request);
+    }
+
+    @PostMapping("/{id}/deactivate")
+    public EmployeeSummary deactivate(@PathVariable long id) {
+        return employeeService.deactivate(id);
     }
 }

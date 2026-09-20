@@ -1,5 +1,6 @@
 package com.acme.salary.employee;
 
+import static com.acme.salary.employee.EmployeeConstraints.EMPLOYEE_CODE_FORMAT;
 import static com.acme.salary.employee.EmployeeSql.FROM_EMPLOYEE_JOINS;
 import static com.acme.salary.employee.EmployeeSql.SALARY_USD;
 
@@ -9,24 +10,43 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class EmployeeRepository {
 
     private static final int USD_SCALE = 2;
+    private static final String PENDING_CODE_PREFIX = "PENDING-";
 
     private static final String SELECT_SUMMARY = """
-            SELECT e.id, e.employee_code, e.full_name, e.email, d.name AS department, jt.title AS job_title,
-                   e.country_code, co.name AS country_name, co.currency, e.employment_type, e.salary_minor,
-                   cur.minor_unit_exponent, %s AS salary_usd, e.hire_date, e.status
+            SELECT e.id, e.employee_code, e.full_name, e.email, e.department_id, d.name AS department,
+                   e.job_title_id, jt.title AS job_title, e.country_code, co.name AS country_name, co.currency,
+                   e.employment_type, e.salary_minor, cur.minor_unit_exponent, %s AS salary_usd,
+                   e.hire_date, e.status
             """.formatted(SALARY_USD);
+
+    private static final String INSERT_EMPLOYEE = """
+            INSERT INTO employee (employee_code, full_name, email, department_id, job_title_id, country_code,
+                                  employment_type, salary_minor, hire_date, status, created_at, updated_at)
+            VALUES (:code, :fullName, :email, :departmentId, :jobTitleId, :countryCode,
+                    :employmentType, :salaryMinor, :hireDate, :status, :now, :now)""";
+
+    private static final String UPDATE_PROFILE = """
+            UPDATE employee
+            SET full_name = :fullName, email = :email, department_id = :departmentId,
+                job_title_id = :jobTitleId, employment_type = :employmentType, updated_at = :now
+            WHERE id = :id""";
 
     private final JdbcClient jdbcClient;
 
@@ -90,7 +110,9 @@ public class EmployeeRepository {
                 rs.getString("employee_code"),
                 rs.getString("full_name"),
                 rs.getString("email"),
+                rs.getLong("department_id"),
                 rs.getString("department"),
+                rs.getLong("job_title_id"),
                 rs.getString("job_title"),
                 rs.getString("country_code"),
                 rs.getString("country_name"),
@@ -100,5 +122,57 @@ public class EmployeeRepository {
                 BigDecimal.valueOf(rs.getDouble("salary_usd")).setScale(USD_SCALE, RoundingMode.HALF_UP),
                 LocalDate.parse(rs.getString("hire_date")),
                 EmployeeStatus.valueOf(rs.getString("status")));
+    }
+
+    public Optional<EmployeeSummary> findById(long id) {
+        return jdbcClient.sql(SELECT_SUMMARY + FROM_EMPLOYEE_JOINS + " WHERE e.id = :id")
+                .param("id", id)
+                .query(EmployeeRepository::mapSummary)
+                .optional();
+    }
+
+    /** Inserts the employee and returns the generated id; the final employee code is derived from it. */
+    public long insert(NewEmployee employee, Instant now) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcClient.sql(INSERT_EMPLOYEE)
+                .param("code", PENDING_CODE_PREFIX + UUID.randomUUID())
+                .param("fullName", employee.fullName())
+                .param("email", employee.email())
+                .param("departmentId", employee.departmentId())
+                .param("jobTitleId", employee.jobTitleId())
+                .param("countryCode", employee.countryCode())
+                .param("employmentType", employee.employmentType().name())
+                .param("salaryMinor", employee.salaryMinor())
+                .param("hireDate", employee.hireDate().toString())
+                .param("status", employee.status().name())
+                .param("now", now.toString())
+                .update(keyHolder);
+        long id = keyHolder.getKey().longValue();
+        jdbcClient.sql("UPDATE employee SET employee_code = :code WHERE id = :id")
+                .param("code", EMPLOYEE_CODE_FORMAT.formatted(id))
+                .param("id", id)
+                .update();
+        return id;
+    }
+
+    public void updateProfile(long id, String fullName, String email, long departmentId, long jobTitleId,
+                              EmploymentType employmentType, Instant now) {
+        jdbcClient.sql(UPDATE_PROFILE)
+                .param("id", id)
+                .param("fullName", fullName)
+                .param("email", email)
+                .param("departmentId", departmentId)
+                .param("jobTitleId", jobTitleId)
+                .param("employmentType", employmentType.name())
+                .param("now", now.toString())
+                .update();
+    }
+
+    public void markInactive(long id, Instant now) {
+        jdbcClient.sql("UPDATE employee SET status = :status, updated_at = :now WHERE id = :id")
+                .param("status", EmployeeStatus.INACTIVE.name())
+                .param("now", now.toString())
+                .param("id", id)
+                .update();
     }
 }

@@ -11,8 +11,6 @@ public final class SeedConstants {
     public static final int DEFAULT_EMPLOYEE_COUNT = 10_000;
     public static final int INSERT_BATCH_SIZE = 1_000;
     public static final String EMAIL_DOMAIN = "acme.example";
-    public static final String EMPLOYEE_CODE_FORMAT = "EMP-%05d";
-    public static final String INITIAL_SALARY_REASON = "Initial salary";
     public static final LocalDate EARLIEST_HIRE_DATE = LocalDate.of(2012, 1, 1);
     public static final int LATEST_HIRE_OFFSET_DAYS = 30;
     public static final int ACTIVE_PERCENTAGE = 95;

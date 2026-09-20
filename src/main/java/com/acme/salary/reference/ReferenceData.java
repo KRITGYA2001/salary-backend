@@ -2,6 +2,7 @@ package com.acme.salary.reference;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,11 +25,20 @@ public record ReferenceData(
     }
 
     public Currency currencyOfCountry(String countryCode) {
-        String currencyCode = countries.stream()
-                .filter(country -> country.code().equals(countryCode))
-                .map(Country::currencyCode)
-                .findFirst()
+        Country country = findCountry(countryCode)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown country: " + countryCode));
-        return currenciesByCode().get(currencyCode);
+        return currenciesByCode().get(country.currencyCode());
+    }
+
+    public Optional<Country> findCountry(String countryCode) {
+        return countries.stream().filter(country -> country.code().equals(countryCode)).findFirst();
+    }
+
+    public Optional<Department> findDepartment(long departmentId) {
+        return departments.stream().filter(department -> department.id() == departmentId).findFirst();
+    }
+
+    public Optional<JobTitle> findJobTitle(long jobTitleId) {
+        return jobTitles.stream().filter(jobTitle -> jobTitle.id() == jobTitleId).findFirst();
     }
 }

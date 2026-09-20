@@ -1,6 +1,6 @@
 package com.acme.salary.seed;
 
-import static com.acme.salary.seed.SeedConstants.INITIAL_SALARY_REASON;
+import static com.acme.salary.salary.SalaryConstants.INITIAL_SALARY_REASON;
 import static com.acme.salary.seed.SeedConstants.INSERT_BATCH_SIZE;
 
 import com.acme.salary.employee.NewEmployee;
