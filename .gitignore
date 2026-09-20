@@ -1,0 +1,18 @@
+# build
+target/
+*.class
+*.jar
+# local DB
+*.db
+*.db-shm
+*.db-wal
+# secrets - never commit keys
+*.key
+*.pem
+*.pub
+id_rsa*
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
