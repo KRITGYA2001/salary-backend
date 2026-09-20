@@ -17,6 +17,7 @@
 		<java.version>17</java.version>
 		<sqlite-jdbc.version>3.50.3.0</sqlite-jdbc.version>
 		<jacoco.version>0.8.13</jacoco.version>
+		<excludedTestGroups>perf</excludedTestGroups>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -77,6 +78,13 @@
 		<finalName>salary-backend</finalName>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludedGroups>${excludedTestGroups}</excludedGroups>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
@@ -97,5 +105,13 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>perf</id>
+			<properties>
+				<excludedTestGroups>none</excludedTestGroups>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
