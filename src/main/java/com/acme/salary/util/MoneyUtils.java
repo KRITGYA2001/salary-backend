@@ -9,6 +9,8 @@ import java.math.RoundingMode;
  */
 public final class MoneyUtils {
 
+    private static final int USD_SCALE = 2;
+
     private MoneyUtils() {
     }
 
@@ -31,5 +33,10 @@ public final class MoneyUtils {
     /** Converts minor units back to a major-unit amount with the currency's scale. */
     public static BigDecimal toMajorUnits(long minorAmount, int minorUnitExponent) {
         return BigDecimal.valueOf(minorAmount, minorUnitExponent);
+    }
+
+    /** Rounds a computed US-dollar figure (for example an average) to whole cents. */
+    public static BigDecimal roundUsd(double usdAmount) {
+        return BigDecimal.valueOf(usdAmount).setScale(USD_SCALE, RoundingMode.HALF_UP);
     }
 }

@@ -6,8 +6,6 @@ import static com.acme.salary.employee.EmployeeSql.SALARY_USD;
 
 import com.acme.salary.util.MoneyUtils;
 import com.acme.salary.util.SqlUtils;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class EmployeeRepository {
 
-    private static final int USD_SCALE = 2;
     private static final String PENDING_CODE_PREFIX = "PENDING-";
 
     private static final String SELECT_SUMMARY = """
@@ -126,7 +123,7 @@ public class EmployeeRepository {
                 rs.getString("currency"),
                 EmploymentType.valueOf(rs.getString("employment_type")),
                 MoneyUtils.toMajorUnits(rs.getLong("salary_minor"), exponent),
-                BigDecimal.valueOf(rs.getDouble("salary_usd")).setScale(USD_SCALE, RoundingMode.HALF_UP),
+                MoneyUtils.roundUsd(rs.getDouble("salary_usd")),
                 LocalDate.parse(rs.getString("hire_date")),
                 EmployeeStatus.valueOf(rs.getString("status")));
     }

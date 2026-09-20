@@ -47,4 +47,10 @@ class MoneyUtilsTest {
         assertThat(MoneyUtils.toMajorUnits(1_234_567L, 2).scale()).isEqualTo(2);
         assertThat(MoneyUtils.toMajorUnits(5_000_000L, 0)).isEqualByComparingTo("5000000");
     }
+
+    @Test
+    void roundsUsdAmountsHalfUpToCents() {
+        assertThat(MoneyUtils.roundUsd(12.345)).isEqualByComparingTo("12.35");
+        assertThat(MoneyUtils.roundUsd(1000.0).scale()).isEqualTo(2);
+    }
 }
