@@ -17,7 +17,7 @@ Spring Boot (Java 17) + SQLite API for managing salaries of about 10,000 employe
 Frontend: `salary-frontend` (React + MUI).
 
 ## Live
-- App: http://140.238.231.135/
+- App: deployed on an Ubuntu VM behind Nginx (URL is given in the submission email)
 - Demo video: _tbd_
 
 ## Features
@@ -45,4 +45,4 @@ Then run the frontend (`npm install && npm run dev`) and open http://localhost:5
 Base path `/api/v1`; errors use `{"error": {"code", "message", "details?"}}`. Endpoints: `GET/POST /employees`, `GET/PATCH /employees/{id}`, `POST /employees/{id}/salary`, `GET /employees/{id}/salary-history`, `POST /employees/{id}/deactivate`, `GET /employees/export.csv`, `GET /meta/filters`, `GET /insights/summary|by/{country|department|jobTitle}|distribution|top`. Full contract in [design](docs/design.md#6-api-contract-restjson-base-apiv1).
 
 ## Deploy
-`./deploy.sh` runs tests, builds the jar and deploys it to the VM. One-time VM setup is in `deploy/provision-vm.sh`. The SSH key is read from `~/.ssh/acme_vm.key` and is never stored in the repo.
+`./deploy.sh` runs tests, builds the jar and deploys it to the VM. One-time VM setup is in `deploy/provision-vm.sh`. Host, user and SSH key path come from a git-ignored `.env` (see `.env.example`); nothing environment specific is stored in the repo.

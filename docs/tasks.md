@@ -32,7 +32,7 @@ gantt
 2. Build is clean (no compiler warnings, lint clean).
 3. Docs updated if behaviour or design changed.
 4. One focused commit with a clear message, pushed.
-5. **Deployed to the VM** with `deploy.sh` and smoke-checked at `http://140.238.231.135/`.
+5. **Deployed to the VM** with `deploy.sh` and smoke-checked through Nginx.
 
 ## Task list
 

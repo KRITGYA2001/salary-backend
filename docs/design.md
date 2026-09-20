@@ -288,7 +288,7 @@ See [performance.md](performance.md). Summary: server-side pagination, indexes, 
 ```mermaid
 flowchart LR
     Dev[Developer machine] -->|"git commit + ./deploy.sh"| VM
-    subgraph VM["Ubuntu VM 140.238.231.135"]
+    subgraph VM["Ubuntu VM"]
       N[Nginx :80]
       SB["salary-backend.service<br/>java -jar, 127.0.0.1:8080"]
       DBF[("/var/lib/salary/salary.db")]
@@ -304,7 +304,7 @@ flowchart LR
 - **Frontend `deploy.sh`:** `npm test`, `npm run build`, `scp`/`rsync` `dist/` to `/var/www/salary/`. Nginx serves it with SPA fallback to `index.html`.
 - **Rule:** every code change is committed and then deployed with `deploy.sh`. The build happens on the developer machine (the VM has too little RAM for Maven or Vite builds).
 - The SSH private key stays outside both repositories (`~/.ssh`) and is never committed.
-- The app is reachable at `http://140.238.231.135/`. HTTPS is not set up (no domain), so the demo uses fictional data only.
+- The app is served by Nginx on port 80 of the VM (address given in the submission email). HTTPS is not set up (no domain), so the demo uses fictional data only.
 
 ## 12. Key decisions and trade-offs
 
