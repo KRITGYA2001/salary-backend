@@ -35,6 +35,10 @@ public class EmployeeRepository {
                    e.hire_date, e.status
             """.formatted(SALARY_USD);
 
+    private static final String SEARCH_CONDITION = """
+            (e.full_name LIKE :search ESCAPE '%1$s' OR e.employee_code LIKE :search ESCAPE '%1$s'
+             OR e.email LIKE :search ESCAPE '%1$s')""".formatted(SqlUtils.LIKE_ESCAPE);
+
     private static final String INSERT_EMPLOYEE = """
             INSERT INTO employee (employee_code, full_name, email, department_id, job_title_id, country_code,
                                   employment_type, salary_minor, hire_date, status, created_at, updated_at)
@@ -120,8 +124,7 @@ public class EmployeeRepository {
             parameters.put("status", criteria.status().name());
         }
         if (criteria.search() != null) {
-            conditions.add("(e.full_name LIKE :search ESCAPE '%1$s' OR e.employee_code LIKE :search ESCAPE '%1$s')"
-                    .formatted(SqlUtils.LIKE_ESCAPE));
+            conditions.add(SEARCH_CONDITION);
             parameters.put("search", SqlUtils.prefixPattern(criteria.search()));
         }
         return conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions);

@@ -3,7 +3,7 @@ package com.acme.salary.employee;
 /**
  * Validated filter, sort and paging options for the employee list. Null filters are ignored.
  *
- * @param search prefix matched against full name and employee code
+ * @param search prefix matched against full name, employee code and email
  */
 public record EmployeeSearchCriteria(
         String countryCode,

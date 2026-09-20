@@ -63,11 +63,13 @@ class EmployeeListApiTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void searchMatchesNameOrCodePrefixCaseInsensitivelyAndEscapesWildcards() throws Exception {
+    void searchMatchesNameCodeOrEmailPrefixCaseInsensitivelyAndEscapesWildcards() throws Exception {
         mockMvc.perform(get(EMPLOYEES_URL).param("search", "bo"))
                 .andExpect(jsonPath("$.totalItems").value(1));
         mockMvc.perform(get(EMPLOYEES_URL).param("search", "EMP-00003"))
                 .andExpect(jsonPath("$.items[0].fullName").value("Carla Jones"));
+        mockMvc.perform(get(EMPLOYEES_URL).param("search", "user2@"))
+                .andExpect(jsonPath("$.items[0].fullName").value("Bob Smith"));
         mockMvc.perform(get(EMPLOYEES_URL).param("search", "%"))
                 .andExpect(jsonPath("$.totalItems").value(0));
     }
