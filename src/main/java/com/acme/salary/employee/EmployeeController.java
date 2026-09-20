@@ -5,8 +5,14 @@ import static com.acme.salary.common.PaginationConstants.MAX_PAGE_SIZE;
 
 import com.acme.salary.common.ApiPaths;
 import com.acme.salary.common.PageResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,17 +55,29 @@ public class EmployeeController {
         if (size < 1 || size > MAX_PAGE_SIZE) {
             throw new IllegalArgumentException("size must be between 1 and " + MAX_PAGE_SIZE);
         }
-        EmployeeSearchCriteria criteria = new EmployeeSearchCriteria(
-                StringUtils.hasText(country) ? country.toUpperCase() : null,
-                department,
-                jobTitle,
-                status,
-                StringUtils.hasText(search) ? search : null,
-                EmployeeSortField.fromParameter(sort),
-                SortDirection.fromParameter(direction),
-                page,
-                size);
+        EmployeeSearchCriteria criteria =
+                toCriteria(country, department, jobTitle, status, search, sort, direction, page, size);
         return employeeService.search(criteria);
+    }
+
+    /** Downloads all employees matching the filters as CSV, streamed row by row in sort order. */
+    @GetMapping("/export.csv")
+    public void exportCsv(
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) Long department,
+            @RequestParam(required = false) Long jobTitle,
+            @RequestParam(required = false) EmployeeStatus status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
+            HttpServletResponse response) throws IOException {
+        EmployeeSearchCriteria criteria = toCriteria(country, department, jobTitle, status, search, sort, direction, 0,
+                Integer.MAX_VALUE);
+        response.setContentType(EmployeeCsvWriter.CONTENT_TYPE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, EmployeeCsvWriter.CONTENT_DISPOSITION);
+        Writer writer = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
+        employeeService.exportCsv(criteria, writer);
+        writer.flush();
     }
 
     @GetMapping("/{id}")
@@ -82,5 +100,19 @@ public class EmployeeController {
     @PostMapping("/{id}/deactivate")
     public EmployeeSummary deactivate(@PathVariable long id) {
         return employeeService.deactivate(id);
+    }
+
+    private static EmployeeSearchCriteria toCriteria(String country, Long department, Long jobTitle,
+            EmployeeStatus status, String search, String sort, String direction, int page, int size) {
+        return new EmployeeSearchCriteria(
+                StringUtils.hasText(country) ? country.toUpperCase() : null,
+                department,
+                jobTitle,
+                status,
+                StringUtils.hasText(search) ? search : null,
+                EmployeeSortField.fromParameter(sort),
+                SortDirection.fromParameter(direction),
+                page,
+                size);
     }
 }

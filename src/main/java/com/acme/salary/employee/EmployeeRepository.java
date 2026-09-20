@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -70,6 +72,24 @@ public class EmployeeRepository {
                 .param("offset", criteria.offset());
         parameters.forEach(statement::param);
         return statement.query(EmployeeRepository::mapSummary).list();
+    }
+
+    /**
+     * Streams every employee matching the criteria in sort order, ignoring paging, so callers can export
+     * large result sets without holding them in memory.
+     */
+    public void forEachMatching(EmployeeSearchCriteria criteria, Consumer<EmployeeSummary> consumer) {
+        Map<String, Object> parameters = new LinkedHashMap<>();
+        String where = buildWhereClause(criteria, parameters);
+        String sql = SELECT_SUMMARY + FROM_EMPLOYEE_JOINS + where
+                + " ORDER BY " + criteria.sortField().sqlExpression() + " " + criteria.sortDirection().name()
+                + ", e.id";
+
+        JdbcClient.StatementSpec statement = jdbcClient.sql(sql);
+        parameters.forEach(statement::param);
+        try (Stream<EmployeeSummary> rows = statement.query(EmployeeRepository::mapSummary).stream()) {
+            rows.forEach(consumer);
+        }
     }
 
     public long count(EmployeeSearchCriteria criteria) {

@@ -11,6 +11,7 @@ import com.acme.salary.reference.ReferenceData;
 import com.acme.salary.reference.ReferenceDataService;
 import com.acme.salary.salary.SalaryHistoryRepository;
 import com.acme.salary.util.MoneyUtils;
+import java.io.Writer;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -43,6 +44,14 @@ public class EmployeeService {
         long totalItems = employeeRepository.count(criteria);
         List<EmployeeSummary> items = totalItems == 0 ? List.of() : employeeRepository.search(criteria);
         return PageResponse.of(items, criteria.page(), criteria.size(), totalItems);
+    }
+
+    /** Writes all matching employees to {@code writer} as CSV without materialising the full result. */
+    @Transactional(readOnly = true)
+    public void exportCsv(EmployeeSearchCriteria criteria, Writer writer) {
+        EmployeeCsvWriter csvWriter = new EmployeeCsvWriter(writer);
+        csvWriter.writeHeader();
+        employeeRepository.forEachMatching(criteria, csvWriter::writeRow);
     }
 
     @Transactional(readOnly = true)
