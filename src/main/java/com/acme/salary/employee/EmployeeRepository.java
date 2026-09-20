@@ -48,6 +48,13 @@ public class EmployeeRepository {
                 job_title_id = :jobTitleId, employment_type = :employmentType, updated_at = :now
             WHERE id = :id""";
 
+    private static final String SELECT_SALARY_CONTEXT = """
+            SELECT e.salary_minor, co.currency, cur.minor_unit_exponent, e.status, e.hire_date
+            FROM employee e
+            JOIN country co ON co.code = e.country_code
+            JOIN currency cur ON cur.code = co.currency
+            WHERE e.id = :id""";
+
     private final JdbcClient jdbcClient;
 
     public EmployeeRepository(JdbcClient jdbcClient) {
@@ -174,5 +181,35 @@ public class EmployeeRepository {
                 .param("now", now.toString())
                 .param("id", id)
                 .update();
+    }
+
+    public Optional<SalaryContext> findSalaryContext(long id) {
+        return jdbcClient.sql(SELECT_SALARY_CONTEXT)
+                .param("id", id)
+                .query((rs, rowNumber) -> new SalaryContext(
+                        rs.getLong("salary_minor"),
+                        rs.getString("currency"),
+                        rs.getInt("minor_unit_exponent"),
+                        EmployeeStatus.valueOf(rs.getString("status")),
+                        LocalDate.parse(rs.getString("hire_date"))))
+                .optional();
+    }
+
+    /**
+     * Sets the new salary only if it still equals the value the caller read, so concurrent changes cannot
+     * silently overwrite each other.
+     *
+     * @return {@code false} if the salary was changed in the meantime
+     */
+    public boolean updateSalary(long id, long expectedSalaryMinor, long newSalaryMinor, Instant now) {
+        int updatedRows = jdbcClient.sql("""
+                        UPDATE employee SET salary_minor = :newSalary, updated_at = :now
+                        WHERE id = :id AND salary_minor = :expectedSalary""")
+                .param("newSalary", newSalaryMinor)
+                .param("now", now.toString())
+                .param("id", id)
+                .param("expectedSalary", expectedSalaryMinor)
+                .update();
+        return updatedRows == 1;
     }
 }

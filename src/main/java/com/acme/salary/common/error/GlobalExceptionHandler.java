@@ -56,6 +56,12 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.NOT_FOUND, exception.getMessage()));
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.of(ErrorCode.CONFLICT, exception.getMessage()));
+    }
+
     /** Requests are validated up front, so a remaining integrity violation is a uniqueness clash. */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException exception) {
