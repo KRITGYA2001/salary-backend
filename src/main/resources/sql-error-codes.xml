@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Teaches Spring's exception translator about SQLite constraint failures (result codes and extended codes). -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="SQLite" class="org.springframework.jdbc.support.SQLErrorCodes">
+        <property name="databaseProductName" value="SQLite"/>
+        <property name="dataIntegrityViolationCodes" value="19,275,787,1299,1555,2067"/>
+    </bean>
+</beans>

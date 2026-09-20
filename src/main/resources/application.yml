@@ -4,6 +4,13 @@ spring:
   datasource:
     url: jdbc:sqlite:${SALARY_DB_PATH:./data/salary.db}
     driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 4
+      data-source-properties:
+        foreign_keys: true
+        journal_mode: WAL
+        synchronous: NORMAL
+        busy_timeout: 5000
 
 server:
   address: ${SERVER_ADDRESS:127.0.0.1}
