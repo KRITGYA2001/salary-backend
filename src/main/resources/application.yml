@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: salary-backend
+  datasource:
+    url: jdbc:sqlite:${SALARY_DB_PATH:./data/salary.db}
+    driver-class-name: org.sqlite.JDBC
+
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      base-path: /api/actuator
+      exposure:
+        include: health

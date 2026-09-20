@@ -1,18 +1,34 @@
-# build
+HELP.md
 target/
-*.class
-*.jar
-# local DB
-*.db
-*.db-shm
-*.db-wal
-# secrets - never commit keys
-*.key
-*.pem
-*.pub
-id_rsa*
-# IDE / OS
-.idea/
-.vscode/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
-.DS_Store
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+.env
